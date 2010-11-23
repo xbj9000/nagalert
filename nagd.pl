@@ -17,37 +17,48 @@ my $thresh = 5;    ## number of alerts required to place call
 my $period = 30;   ## minutes in which notifications must occur
 my $wait = 120;    ## seconds to listen for more issues before calling
 
-my @alerts;
-my $ami;
-
 ## run as daemon
 Proc::Daemon::Init();
 
 ## open a network socket to listen for nagios input
 my $in_pipe = IO::Socket::INET->new(Proto => 'tcp',
                                    Listen => '32',
-                                LocalAddr => '555.87.6.5',
+
+                    ## IP of this (asterisk) machine
+                                LocalAddr => '192.168.1.23',
+
+                    ## port on which to listen for incoming nagios data
                                 LocalPort => '6066');
 
 ## subroutine to send alerts via phone call
 sub ami_send {
     $ami = Asterisk::AMI->new(PeerAddr => 'localhost',
-                              PeerPort => '5044',
+                              PeerPort => '5038',
                               Username => 'admin',
-                                Secret => 'poop');
+                                Secret => 'password');
 
     $ami->action({Action => 'Originate',
-                 Channel => 'SIP/Main Trunk/5035559309',
+
+            ## 'Channel' is the equivalent of <tech/data> in asterisk.
+            ##  example: to send a call out of SIP/Trunk1 to
+            ##  503-555-0123, set Channel to SIP/Trunk1/5035550123
+                 Channel => 'SIP/Main Trunk/5035550123',
+
                  Context => 'default',
              Application => 'Playback', 
                     Data => 'nags',
-                Callerid => '9315551540',
+
+            ## where call will appear to come from
+                Callerid => '5035550321',
+
                  Timeout => '30000',
                 ActionId => 'DEF1337',
                 Priority => '1'});
 
     $ami->disconnect();
 }
+
+my @alerts; my $ami;
 
 ## needed to check for new input before proceeding with call
 my $in_check = IO::Select->new($in_pipe); 
@@ -65,7 +76,7 @@ LOOP: while (1) {
 
     if ($data =~ /RECOVERY|ACKNOWLEDGEMENT/) {
         ## clear resolved issues
-        $data =~ s/^.*(Host:.*Address).*$/$1/;
+        $data =~ s/^.*(Host:.*State:).*$/$1/;
         @alerts = grep {$_ !~ /$data/} @alerts;
     } else {
         ## timestamp and push new issues to @alerts
@@ -83,8 +94,6 @@ LOOP: while (1) {
 
         ## filter unimportant details
         for (@alerts) {
-            s/^.*(Host:.*)Address.*(State:.*)
-                Date\/Time.*(Additional.*$)/$1$2$3/x;
             s/ \=//; s/ \(.*$/./;
         }
 

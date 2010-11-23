@@ -15,9 +15,13 @@ my $out_pipe;
 
 ## network socket connection to asterisk
 sub connect {
-    $out_pipe = IO::Socket::INET->new(PeerAddr => '555.87.6.5',
-                                      PeerPort => '6066',
-                                         Proto => 'tcp') or &sleep;
+    $out_pipe = IO::Socket::INET->new(Proto => 'tcp',
+
+                            ## IP of asterisk machine
+                                   PeerAddr => '192.168.1.23',
+
+                            ## port on which asterisk machine listens
+                                   PeerPort => '6066') or &sleep;
 }
 
 ## subroutine to wait and try again if unsuccessful

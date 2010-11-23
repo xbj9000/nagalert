@@ -1,0 +1,30 @@
+
+Understanding and Using nagd.pl and nagc.pl
+-------------------------------------------
+
+
+SUMMARY:
+
+nagd.pl and nagc.pl are a daemon and client system for monitoring 
+network status via Nagios and Asterisk.  When Nagios sends an 
+unacceptable amount of problem notifications, Asterisk can respond 
+by placing a call to the administrator's phone, using eSpeak.
+
+
+-------------------------------------------
+
+
+USAGE:
+
+nagd.pl should run constantly on your Asterisk machine, 
+waiting for and handling input from Nagios.
+
+nagc.pl should reside on your Nagios machine, and be 
+executed each time a new notification occurs.
+
+-----------
+:IMPORTANT: 
+-----------
+Please see commands.cfg.example and contacts_nagios2.cfg.example,
+as these need to be applied to your Nagios machine.
+
