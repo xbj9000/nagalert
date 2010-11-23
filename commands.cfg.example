@@ -2,7 +2,7 @@
 ## This goes in your /etc/nagios3/commands.cfg
 
 define command{
-	command_name	notify-by-phone
-	command_line	/usr/bin/nagc "Notification Type: $NOTIFICATIONTYPE$. Host: $HOSTALIAS$. State: $HOSTSTATE$. Additional Info: $HOSTOUTPUT$."
+    command_name    notify-by-phone
+    command_line    /usr/bin/nagc "Notification Type: $NOTIFICATIONTYPE$. Host: $HOSTALIAS$. State: $HOSTSTATE$. Additional Info: $HOSTOUTPUT$."
 }
 
